@@ -36,5 +36,46 @@ Both Beacon and Transparent rely on an **external admin** contract/role controll
 UUPS, on the other hand, puts `upgradeTo()` in the implementation — so the “shared admin role risk” doesn’t exist in the same way (its risk is unprotected `upgradeTo()`).
 
 ---
+Spot the bug – What is the main security issue in this Beacon Proxy?
+```solidity
+interface IBeacon {
+    function implementation() external view returns (address);
+}
+contract BeaconProxy {
+    address public beacon;
+    constructor(address _beacon) {
+        beacon = _beacon;
+    }
+    fallback() external payable {
+        address impl = IBeacon(beacon).implementation();
+        assembly {
+            calldatacopy(0, 0, calldatasize())
+            let result := delegatecall(gas(), impl, 0, calldatasize(), 0, 0)
+            returndatacopy(0, 0, returndatasize())
+            switch result
+            case 0 { revert(0, returndatasize()) }
+            default { return(0, returndatasize()) }
+        }
+    }
+}
+```
+A. `beacon` is not immutable, meaning anyone can change the beacon and upgrade the proxy.  
+B. The proxy trusts the beacon blindly; if the beacon is malicious, it can point to an attacker contract.  
+C. Both A and B.  
+D. No issue, this is a standard minimal BeaconProxy implementation.
+
+answer: C ✅ Both problems exist here:
+1. Beacon mutability (A):
+   - `address public beacon;` is just a normal storage var.
+   - No `immutable` keyword, no access control, no setter restrictions.
+   - If anyone (or even the deployer) can change it later via some added function, attackers can redirect the proxy to their own beacon.
+2. Trusting the beacon blindly (B):
+   - Even if the beacon itself is upgradeable, this proxy never verifies what it returns.
+   - A compromised/malicious beacon can point to an attacker implementation contract at any time.
+   - That’s why **beacon upgrades need admin governance and strong access control**.
+
+**Takeaway**: Beacon Proxy inherits the risks of both storage collision AND malicious beacon logic.
+
+---
 **References**:
 - https://ethereum.stackexchange.com/a/161348
