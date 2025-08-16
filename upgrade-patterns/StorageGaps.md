@@ -29,4 +29,4 @@ Why this is safe (concise):
 - Use OpenZeppelin’s `validateUpgrade` / `upgradeProxy` checks before upgrading — they will flag layout issues.
 - Be careful with inheritance: changing base contract order or adding variables in a base can shift slots for children.
 - Consider more robust namespaced layouts (ERC-7201) for complex systems that need stronger guarantees.
-- Also keep in mind that your variables may be packed tightly depending on their type. Size should be reduced by the no.of extra slots consumed (not no.of extra variables introduced) See https://docs.soliditylang.org/en/latest/internals/layout_in_storage.html
+- Also keep in mind that your variables may be packed tightly depending on their type. Size should be reduced by the no.of extra slots consumed (not by the no.of extra variables introduced) See https://docs.soliditylang.org/en/latest/internals/layout_in_storage.html
