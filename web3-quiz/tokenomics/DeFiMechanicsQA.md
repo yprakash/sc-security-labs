@@ -133,3 +133,37 @@ Why not B (reentrancy)?
 👉 This is a common audit finding: “Incompatible with fee-on-transfer/deflationary tokens.”
 
 ---
+
+What is the **biggest hidden design issue** (not a basic syntax or gas problem) in below staking contract snippet for distributing rewards proportionally?
+```solidity
+uint256 public totalStaked;
+mapping(address => uint256) public balances;
+address[] public stakers;
+function stake(uint256 amount) external {
+    stakingToken.transferFrom(msg.sender, address(this), amount);
+    balances[msg.sender] += amount;
+    totalStaked += amount;
+}
+function distributeRewards(uint256 reward) external {
+    require(totalStaked > 0, "Nothing staked");
+    rewardToken.transferFrom(msg.sender, address(this), reward);
+    // simplistic distribution
+    for (uint256 i = 0; i < stakers.length; i++) {
+        uint256 share = reward * balances[stakers[i]] / totalStaked;
+        rewardToken.transfer(stakers[i], share);
+    }
+}
+```
+A. Rewards can be drained if stakers list is manipulated.  
+B. Looping over stakers makes this function DoS-prone as staker count grows.  
+C. reward * balances[stakers[i]] / totalStaked may round down unfairly.  
+D. rewardToken.transferFrom can reenter and manipulate balances.
+> B (DoS via unbounded loop) is the real hidden design flaw.
+- If `stakers` grows to thousands, the `for` loop will **consume too much gas** and `distributeRewards` becomes uncallable.
+- Attackers can even stake dust amounts (like 1 wei tokens) to **inflate** `stakers.length` and effectively freeze the protocol — a **griefing/DoS vector**.
+- [PullBasedStaking](/tutorials/staking/StakingPullBased.sol)
+- **C (rounding down)** is true in practice, but it’s a _fairness/economic quirk_ rather than a critical vulnerability. Most reward distribution schemes accept integer rounding loss.
+
+Real-world reference
+- Many early staking contracts had this exact issue (looping over users).
+- Modern DeFi uses **pull-based rewards**: instead of looping, each user claims their share individually using **accumulated reward per share** math (like in MasterChef contracts).
