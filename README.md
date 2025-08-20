@@ -20,8 +20,8 @@ Comprehensive solutions to all [Ethernaut](https://ethernaut.openzeppelin.com/) 
 - Each level solved with **exploitation scripts, automated tests, and detailed writeups**.  
 - Demonstrates practical offensive security techniques and remediation strategies.
 
-### `security-quiz/`
-A knowledge base of **interview-style security FAQs and quizzes**:  
+### `web3-quiz/`
+A knowledge base of **blockchain security FAQs and quizzes**:  
 - Covers smart contract internals, EVM quirks, Solidity gotchas, and DeFi-specific risks.  
 - Serves as a quick reference for common pitfalls and exam-style questions.
 

@@ -1,6 +1,6 @@
 # Fee on Transfer Tokens
 
-Fee-on-transfer tokens are ERC-20 tokens that deduct a fee whenever they are transferred. This fee could be used for various purposes, such as burning a percentage of the tokens, redirecting a portion of each transaction to a specific wallet (e.g., for development, marketing, or redistribution to holders), or other utility-specific mechanisms.
+Fee-on-transfer tokens (also called taxed tokens) are ERC-20 tokens that deduct a fee whenever they are transferred. This fee could be used for various purposes, such as burning a percentage of the tokens, redirecting a portion of each transaction to a specific wallet (e.g., for development, marketing, or redistribution to holders), or other utility-specific mechanisms.
 
 Example: ./FeeOnTransferToken.sol
 
@@ -9,7 +9,7 @@ In this example, every time a transfer occurs, a fee is calculated and deducted 
 Real-World Example: Reflect Finance (RFI)  
 [RFI](https://etherscan.io/token/0xa1afffe3f4d611d252010e3eaf6f4d77088b0cd7#code) is a real-world example of a fee-on-transfer token. Every time an RFI token is transferred, a fee (typically 1%) is deducted from the transaction amount. This fee is then distributed among existing token holders, creating an automatic yield for holders based on transaction volume.
 
-# Rebase Tokens
+# Rebase (supply-elastic) Tokens
 
 Rebase tokens adjust their total supply algorithmically, either increasing or decreasing the balance of all token holders simultaneously. The goal is typically to maintain a peg or target price by expanding or contracting the total supply in response to market conditions.
 
