@@ -98,3 +98,36 @@ If a swap function lacks a slippage parameter, users are at the **mercy of MEV b
 That’s textbook sandwich attack surface.
 
 ---
+### Privilege escalation subtlety
+A contract has:
+```solidity
+address public admin;
+function upgrade(address newImpl) external {
+    require(msg.sender == admin, "not admin");
+    _upgradeTo(newImpl);
+}
+```
+Initially, `admin` is set to the deployer in the constructor.  
+Later, a governance mechanism calls `admin = timelock` (a smart contract).
+
+**Question**: What’s the attack surface now?  
+A. None, timelock is trusted  
+B. If timelock has upgrade paths (e.g., new governance logic), attacker could seize admin rights through timelock exploitation  
+C. Only denial of service, no escalation possible  
+D. It’s equivalent to a multisig, so safe
+> B
+
+When `admin` is an **EOA**, privilege boundaries are simple.  
+But once governance or a timelock contract takes over:
+- That contract itself becomes part of the **trusted computing base**.
+- If the timelock can be exploited (logic bug, misconfigured delay, compromised proposer/queue logic),
+an attacker can **indirectly escalate** into the `upgrade()` function.
+
+So the **attack surface expands**: instead of “only admin key compromised,”  
+now **any weakness in governance = proxy hijack**.
+
+This is a recurring real-world issue:
+- Compound v2 governance bug (2020).
+- Bad Timelock configurations in smaller DAOs.
+
+---
