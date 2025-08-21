@@ -131,3 +131,83 @@ This is a recurring real-world issue:
 - Bad Timelock configurations in smaller DAOs.
 
 ---
+### External call ordering
+Look at this payout function:
+```solidity
+function payWinner(address winner, uint amount) external onlyGame {
+    require(balance >= amount, "not enough balance");
+    (bool ok,) = winner.call{value: amount}("");
+    require(ok, "send failed");
+    balance -= amount;
+}
+```
+What’s the attack surface here?  
+A. Safe — it updates balance after sending, no issue  
+B. Reentrancy risk: state update happens after external call  
+C. Denial of service: malicious winner can force send failed  
+D. Both B and C
+> D. Both B and C
+- External call to `winner.call{value: amount}("")` happens **before** balance deduction.
+- If `winner` is a contract with a `receive()` or `fallback()`, it can reenter `payWinner()` or other vulnerable functions and exploit the inflated balance.
+- Classic CEI violation.
+- Even if `winner` isn’t malicious, it could accidentally or intentionally **revert in its fallback**.
+- Because `require(ok)` enforces success, payout fails, blocking further progress.
+- That’s a griefing surface — attacker doesn’t need to steal funds, just lock them.  
+So both risks coexist.
+#### Note:
+- **The reentrancy vector depends on what** `onlyGame` **actually enforces**.
+  - If `onlyGame = require(msg.sender == game)`, then indeed the winner’s fallback **cannot directly reenter** `payWinner()`, since fallback’s `msg.sender` is the contract itself, not the `game`.
+  - That blocks _direct recursive_ `payWinner()` calls.
+
+But:
+- The attacker’s fallback could instead call **back into the** `game` contract, if the game exposes any entrypoints that eventually call `payWinner()` again.
+- So the surface is still there — whether it’s exploitable depends on how `onlyGame` is implemented and whether the call graph loops back.
+
+Additionally, even if reentrancy is blocked here, the **DoS griefing** (C) is still valid: winner can revert → payout fails → funds locked.
+
+👉 So the safer phrasing:
+- Always flag CEI violation (balance updated after external call).
+- Severity might be lower (Medium) if reentrancy blocked by access control, but still worth reporting because “DoS griefing” + “potential indirect reentrancy via game” are real risks.
+
+---
+### MEV & price oracle
+A lending protocol uses a TWAP (time-weighted average price) oracle from Uniswap V2.  
+Update function:
+```solidity
+function updatePrice() external {
+    (uint112 reserve0, uint112 reserve1,) = pair.getReserves();
+    price = reserve1 * 1e18 / reserve0;
+}
+```
+What’s the MEV/attack surface here?  
+A. Safe — TWAP prevents manipulation  
+B. Vulnerable — this isn’t a TWAP, it’s just a spot price, manipulable with flash loans  
+C. Vulnerable only if attacker owns >50% liquidity  
+D. No risk — Uniswap is decentralized
+> B
+
+That oracle is **not a TWAP at all** — it’s a spot price.
+- Anyone with a flash loan can manipulate reserves for 1 block.
+- Call `updatePrice()` in that block → oracle updates to fake value.
+- Attackers then borrow/lend/trigger liquidations unfairly.
+
+This was exactly what happened in the **bZx / Cheese Bank exploits** (2020).
+
+---
+### Oracle design flaw
+A contract uses Chainlink price feed:
+```solidity
+function getPrice() public view returns (int256) {
+    return priceFeed.latestAnswer();
+}
+```
+What’s the main security concern here?  
+A. None, Chainlink is always safe  
+B. Relying on latestAnswer() without staleness check (may return outdated or 0 value)  
+C. Vulnerable to sandwich attack  
+D. Oracle manipulation with flash loans
+> B. Relying on `latestAnswer()` without staleness check
+- Relying on `latestAnswer()` is unsafe without checking if the oracle is **stale or invalid**.
+You need to use Chainlink’s `latestRoundData()` and check `updatedAt` and round completeness.
+
+---
