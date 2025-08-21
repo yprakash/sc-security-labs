@@ -167,3 +167,87 @@ D. rewardToken.transferFrom can reenter and manipulate balances.
 Real-world reference
 - Many early staking contracts had this exact issue (looping over users).
 - Modern DeFi uses **pull-based rewards**: instead of looping, each user claims their share individually using **accumulated reward per share** math (like in MasterChef contracts).
+
+---
+### Lazy reward update mechanism
+You are reviewing a staking contract that distributes rewards proportional to user stake.  
+The contract stores a `rewardPerToken()` value that is updated only when someone calls `stake()` or `withdraw()`.
+```solidity
+function stake(uint256 amount) external {
+    stakingToken.transferFrom(msg.sender, address(this), amount);
+    balances[msg.sender] += amount;
+    totalStaked += amount;
+    rewardPerTokenStored = rewardPerToken();  
+    lastUpdateTime = block.timestamp;  
+}
+```
+**Issue**: If no one calls stake/withdraw for a long time, the rewards are not updated, and late claimers may get **more rewards than intended** (since updates only happen on certain flows).  
+What’s the core problem here?
+
+A. Rewards are front-runnable.  
+B. Rewards distribution relies on user actions instead of being continuous.  
+C. Contract does not use SafeERC20 for transfers.  
+D. Rewards can be stolen if totalStaked becomes zero.
+> B. Rewards distribution relies on user actions instead of being continuous.
+- This is called a "_lazy reward update mechanism_" — the protocol only updates `rewardPerToken` when someone _interacts_ (stake/withdraw).
+- If no one calls those functions for a long time, the global `rewardPerToken` remains stale.
+- The first person to interact forces the update, and depending on the accounting, they might get an unfair portion of rewards.
+- This is a **design flaw**, not an immediate exploit, but it leads to distorted distribution and incentivizes **gaming behavior** (people delaying claims to maximize yield).
+
+🛡 Defense
+
+Auditors typically recommend:
+1. Pull-based accounting
+   - Update rewards not just on stake/withdraw, but also on claimRewards().
+   - Rewards should always accrue based on block.timestamp (or block.number) differences.
+2. Continuous accrual math
+   - Instead of waiting for an external trigger, keep formulas like:
+    ```solidity
+    rewardPerTokenStored + (rewardRate * (block.timestamp - lastUpdateTime)) / totalStaked
+    ```
+    so every read reflects the correct reward up to “now.”
+3. Testing edge cases
+   - Test scenarios with zero interactions for long periods.
+
+⚡ **Real-world note**: Several yield farms and early DeFi staking contracts had this bug (2020–2021), which led to reward imbalances.
+
+---
+### Dilution Attack in Reward Pools
+Imagine a pool distributing fixed rewards per block across all stakers:
+- `rewardRate = 10 tokens per block`
+- Rewards are split proportionally to `totalStaked`.
+
+Scenario
+1. Alice stakes 100 tokens early and accrues rewards over many blocks.
+2. Right before claiming, Bob stakes a huge amount (e.g., 10,000 tokens).
+3. The reward calculation updates:
+   - Alice’s accumulated rewards get “locked in” only at that update moment.
+   - But from that block forward, Bob dilutes the pool and starts taking the lion’s share of emissions.
+
+Result → Alice, who bore the risk early, gets diluted, while Bob gets a **risk-free share of future rewards** without participating earlier.  
+What’s the vulnerability classification here?
+
+A. Front-running risk (Bob times his entry to dilute Alice).  
+B. Economic design flaw (unfair dilution, not a coding bug).  
+C. Reentrancy vulnerability (since claim overlaps with stake).  
+D. Oracle manipulation (rewardRate depends on external source).
+> B. Economic design flaw (unfair dilution, not a coding bug).
+
+This isn't a coding bug like reentrancy or a cryptographic vulnerability.
+Instead, the problem stems from the fundamental rules of the staking pool's design.
+The system is set up in a way that allows a new participant (Bob) to unfairly
+diminish the future rewards of an existing participant (Alice) without having
+contributed to the pool's security or liquidity during the earlier period.
+This is often referred to as a "**dilution attack**" or "**vampire attack**" in the context of DeFi.
+
+Rewards are distributed pro-rata from the moment you enter → which allows a whale to "time the market" and
+grab a disproportionate share of emissions. It’s a fairness / tokenomics issue, not a Solidity/EVM coding mistake.
+
+Defenses (belt-and-suspenders design)
+- Vest rewards linearly over staking duration → no instant dilution.
+- Lockup periods → force stakers to stay for some time.
+- Boost multipliers → early/longer stakers get a multiplier, so late whales can’t dilute instantly.
+- Epoch-based reward distribution → rewards fixed for the epoch, new entrants wait until the next round.
+
+🔥 Trick: auditors often flag this as “_Economic Vulnerability: Reward Dilution_” rather than a bug,
+but in DeFi audits this is critical because it can destroy protocol incentives.
