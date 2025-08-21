@@ -4,16 +4,13 @@ Consider this simplified staking contract:
 contract Staking {
     IERC20 public immutable token;
     mapping(address => uint256) public balance;
-
     constructor(IERC20 _token) {
         token = _token;
     }
-
     function deposit(uint256 amount) external {
         require(token.transferFrom(msg.sender, address(this), amount));
         balance[msg.sender] += amount;
     }
-
     function withdraw(uint256 amount) external {
         require(balance[msg.sender] >= amount, "Not enough");
         balance[msg.sender] -= amount;
@@ -50,5 +47,54 @@ Two attack vectors here:
 
 So: attacker doesn’t “lose money” — they create **state desync / phantom credit** situations.  
 That’s why auditors flag CEI violations in both deposit and withdraw paths.
+
+### 🔎 ERC777 hooks and which calls trigger them?
+- `token.transferFrom()`: Yes, this triggers the ERC777 `tokensToSend` (from sender) and `tokensReceived` (to receiver) hooks.
+- `token.transfer()`: Also triggers ERC777 hooks the same way.
+
+So in both `deposit()` and `withdraw()` of your contract, the ERC777 `tokensReceived` can fire and give attacker reentrancy entry points.
+
+The **difference** was the ordering of state updates:
+- In `deposit()`: state updated after external call → unsafe.
+- In `withdraw()`: state updated before external call → safe against balance-inflating reentrancy.
+
+But note: `withdraw()` is still externally calling an `untrusted token contract`, so while balance is safe, the function can still be griefed (e.g., revert in hook → DoS).
+
+---
+### External calls & gas griefing
+A DEX router calls `token.transferFrom()` in a loop to pull multiple tokens.
+If one token reverts with `OutOfGas` (due to ERC777 hook consuming all gas), how does this affect the attack surface?
+
+A. Only that token’s transfer fails, others unaffected  
+B. Entire batch reverts — attacker can grief all users by forcing DoS on one transfer  
+C. Just consumes extra gas but transaction still succeeds  
+D. No effect, ERC20 standard forbids out-of-gas reverts
+> B. If one `transferFrom` fails in a loop, the entire transaction reverts.
+
+That means a malicious ERC777 token can DoS the whole batch. Classic griefing attack surface:
+- Scenario: Router pulls `DAI`, `USDC`, `MALICIOUS`.
+- Malicious token’s `tokensReceived` hook uses all gas or reverts.
+- Whole batch fails → no user can swap via router.
+
+This is why Uniswap v2/v3 avoid token batch pulls and enforce isolated calls.
+
+---
+### MEV — Sandwich risk
+A DEX contract exposes `swapExactTokensForTokens` with no slippage parameter. Users just specify `amountIn` and get `amountOut` at current pool price.  
+Question: What’s the primary MEV attack surface here?
+
+A. Front-running user swaps to block them  
+B. Sandwiching: attacker inserts buy before, sell after, extracting profit  
+C. Time-based arbitrage on oracles  
+D. Flash loan reentrancy in the swap
+> B. Sandwiching
+
+If a swap function lacks a slippage parameter, users are at the **mercy of MEV bots**:
+- Bot sees Alice’s swap in mempool (`10k DAI → ETH`).
+- Bot front-runs with a buy (pushing ETH price up).
+- Alice’s trade executes at worse rate (slippage not protected).
+- Bot back-runs with a sell to capture the spread.
+
+That’s textbook sandwich attack surface.
 
 ---
