@@ -211,3 +211,103 @@ D. Oracle manipulation with flash loans
 You need to use Chainlink’s `latestRoundData()` and check `updatedAt` and round completeness.
 
 ---
+### Governance attack surface
+A DeFi protocol uses governance tokens to vote. Attackers borrow governance tokens via a flash loan and pass a malicious proposal.  
+What’s the best defense?
+
+A. Use snapshot of balances at block proposal was created  
+B. Require proposal deposits (stake that can be slashed)  
+C. Time delay before execution  
+D. All of the above
+> D. All of the above
+- Each mitigation covers a different dimension of the flash-loan governance problem:
+1. Snapshotting balances (A) → prevents attackers from voting with flash-loaned tokens since voting power is measured at block proposal creation, not at execution.
+2. Proposal deposits / stake (B) → raises the economic cost of spamming malicious proposals. If they fail or are malicious, the stake can be slashed.
+3. Timelock delay (C) → even if an attacker sneaks a proposal through, it can’t execute immediately. This gives the community and multisigs time to intervene.
+
+Modern governance frameworks (Compound’s Governor, OpenZeppelin Governor) typically use all three together.
+
+---
+### MEV twist
+A lending contract lets users liquidate unhealthy positions:
+```solidity
+function liquidate(address borrower) external {
+    require(_isUnhealthy(borrower), "Not liquidatable");
+    uint reward = _calcReward(borrower);
+    collateral[borrower] -= reward;
+    collateral[msg.sender] += reward;
+}
+```
+What’s the **main attack surface** here?  
+A. Reentrancy via collateral updates  
+B. MEV front-running to steal liquidations  
+C. Integer overflow in collateral[borrower] -= reward  
+D. Privilege escalation via borrower impersonation
+> B. MEV front-running to steal liquidations
+- The function `liquidate()` is **permissionless** — anyone can call it.
+- That means if you spot a liquidation opportunity and try to call it, a bot can see your transaction
+  in the mempool and **front-run** you with a higher gas fee, executing the liquidation first.
+- The attacker (MEV bot) earns the liquidation reward instead of you.
+
+This is exactly why protocols like **Aave** and **Compound** suffer heavy MEV competition for liquidations — bots monitor the mempool and race to capture these rewards.
+
+Notable details:
+- A: Reentrancy not possible here since no external calls.
+- C: Overflow is unlikely in Solidity ≥0.8 (checked arithmetic).
+- D: No borrower impersonation risk — the borrower is passed as an address, and health check ensures correctness.
+
+#### 📌 Defense ideas:
+- Allow liquidators to submit **sealed bids (commit-reveal)** to reduce MEV.
+- Use **flashbots/private transactions** to avoid front-running.
+- Implement **auction-style liquidations** (e.g., Dutch auction instead of first-come).
+
+---
+
+A governance contract executes arbitrary proposals:
+```solidity
+function execute(address target, bytes calldata data) external {
+    require(votes[msg.sender] > quorum, "Not enough votes");
+    (bool ok, ) = target.call(data);
+    require(ok, "Exec failed");
+}
+```
+What’s the **biggest attack surface** here?  
+A. Reentrancy via governance calls  
+B. Privilege escalation via forged votes  
+C. Arbitrary external call execution (function selector abuse)  
+D. MEV frontrunning to reorder proposal execution
+> C. Arbitrary external call execution (function selector abuse)
+- The contract allows **any voted account** to execute arbitrary calldata on any target contract.
+- That means if an attacker accumulates enough votes (or exploits governance token manipulation), they can:
+  - Call `selfdestruct` on a vault contract.
+  - Call `transferOwnership()` on sensitive contracts.
+  - Drain treasuries or upgrade proxies.
+- This is a **privilege escalation** vector at the **function-call granularity**: the attacker doesn’t need a bug in the target — they just need governance power.
+
+Details on the distractors:
+- A: Reentrancy isn’t relevant unless governance executes contracts with external reentry hooks.
+- B: Forged votes are another angle but **not the primary danger** in the code given.
+- D: MEV frontrunning could reorder execution, but the **bigger systemic risk is arbitrary execution power**.
+
+#### 📌 Real-world reference:
+- Compound governance bug (2020): arbitrary function selector allowed malicious proposals to seize admin rights.
+- bZx hack (2021): governance takeover led to protocol draining.
+
+---
+
+Which of the following is the most **subtle attack surface** auditors often miss in Solidity contracts?  
+A. Incorrect visibility (public vs internal)  
+B. Gas griefing (forcing tx failures via out-of-gas)  
+C. Unchecked ERC20 return values  
+D. Misconfigured access in upgradeable proxy patterns
+> D. Misconfigured access in upgradeable proxy patterns
+- Upgradeable contracts (UUPS, Transparent, Beacon) delegate critical logic to proxy + implementation patterns.
+- If the `upgradeTo()` or `initialize()` functions are not properly **restricted**, an attacker can:
+  - Take control of the implementation slot,
+  - Deploy a malicious implementation,
+  - Or re-initialize the contract with themselves as the admin.
+- Unlike simple reentrancy or unchecked ERC20 issues, this is **architecture-level** and often overlooked by both developers and inexperienced auditors.
+
+#### Examples:
+- Audius exploit (July 2022): attacker re-initialized proxy, became owner, drained ~$6M.
+- ParaSpace exploit attempt (2023): privilege escalation through misconfigured upgradeability.
