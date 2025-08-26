@@ -1,6 +1,6 @@
 # Ethernaut Challenges
-
 ### Overview
+
 This section contains my end-to-end work on [Ethernaut](https://ethernaut.openzeppelin.com/), the smart contract security CTF game by OpenZeppelin.  
 Each level demonstrates a distinct Solidity/EVM vulnerability — I’ve solved them all with a dual approach:
 - **Exploit contracts** (`attack.sol`) written in Solidity
@@ -10,7 +10,6 @@ Each level demonstrates a distinct Solidity/EVM vulnerability — I’ve solved 
 The goal is not only to solve Ethernaut, but to document, automate, and test each vulnerability as if it were part of a professional audit process.
 
 ---
-
 ### Structure
 sc-security-labs/ethernaut/  
 ├── 01_FallbackTrap/  
@@ -41,7 +40,6 @@ sc-security-labs/ethernaut/
   - Validates the exploit in a reproducible and automated way.  
 
 ---
-
 ### Approach
 1. **Minimal Documentation**  
    Each challenge has a concise `README.md` that highlights:
@@ -61,7 +59,6 @@ sc-security-labs/ethernaut/
    Reviewers can directly inspect the exploit contract, test, or automation script — the way an auditor would in real-world engagements.
 
 ---
-
 ### Why This Matters
 For potential employers and clients, this folder shows:
 - **Hands-on mastery of Ethereum security** through Ethernaut.  
@@ -70,16 +67,20 @@ For potential employers and clients, this folder shows:
 - **Clarity**: Minimal explanations, with code/tests as the source of truth.
 
 ---
-
 ### Lessons Learned
 - Solidity vulnerabilities are best understood with **working exploits + tests**.  
 - Good documentation is concise: capture the essence, let the code speak.  
 - Combining multiple toolchains (Foundry + Python) reflects real-world auditing practice.  
 
 ---
-
 ### References
 - [Ethernaut – OpenZeppelin](https://ethernaut.openzeppelin.com/)  
-- [Ethereum Smart Contract Best Practices](https://consensys.github.io/smart-contract-best-practices/)  
+- [Solidity Docs](https://docs.soliditylang.org/en/v0.8.30/)  
 - [Foundry Book](https://book.getfoundry.sh/)  
 - [Web3.py Documentation](https://web3py.readthedocs.io/)  
+
+---
+## 📬 Feedback or Collaboration?
+Feel free to contact me in case of any issues, or DM me on [LinkedIn](https://www.linkedin.com/in/yprakash/).  
+
+If you’re hiring for protocol security or audit engineering — feel free to [reach out](mailto:yprakash.518@gmail.com).
