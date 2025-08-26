@@ -5,32 +5,73 @@
 [![Foundry](https://img.shields.io/badge/Foundry-Forge-green.svg)]()
 
 **Smart Contract Security Labs (`sc-security-labs`)** is a curated collection of hands-on projects, challenges, and educational resources focused on **Ethereum, DeFi, and Web3 security**.  
-The goal of this repository is to demonstrate **deep practical expertise in identifying, exploiting, and defending against smart contract vulnerabilities**, while also documenting critical blockchain security concepts in a structured way.
+
+The **goal**: build a structured knowledge base and reproducible exploit labs that reflect both **practical security engineering** and **clear documentation**.  
+
+👉 `sc-security-labs` is my **living Web3 security lab**.  
+
+---
+## 📂 Repository Structure
+### 1. `audits/`
+- Contains several subfolders, each simulating an **audit engagement** on a DeFi protocol or smart contract system.  
+- Includes:
+  - Vulnerability findings (documented in markdown).  
+  - Proof-of-concept exploits (Solidity/Python).  
+  - Tests verifying exploitability and fixes.  
+
+👉 *Realistic audit-style case studies with reproducible examples.*  
+
+---
+### 2. [`concepts/`](./concepts/)
+- Explanations of **DeFi primitives** and **security concepts**.  
+- Each file focuses on a single topic (e.g., fee-on-transfer tokens, rebasing mechanics, access control pitfalls).  
+- Written in a clear, blog-style format with definitions, examples, risks, and mitigations.  
+
+👉 *Concise references for key blockchain security topics.*  
 
 ---
 
-## 📂 Repository Structure
+### 3. [`ethernaut/`](./ethernaut/)
+- Full coverage of the [Ethernaut](https://ethernaut.openzeppelin.com/) smart contract CTF by OpenZeppelin.  
+- Each level includes:
+  - `attack.sol` → exploit contract (if required).  
+  - `script.py` → Python automation for deployment/interaction.  
+  - `test/LevelX.t.sol` → Foundry tests for reproducibility.  
+  - `README.md` → minimal explanation of the vulnerability.  
 
-### `concepts/`
-Clear and concise explanations of **core blockchain & DeFi concepts**, written with a security-first perspective.  
-Covers topics like transaction ordering, composability, liquidation mechanisms, randomness in smart contracts, and more.
+👉 *Hands-on demonstration of core Solidity/EVM vulnerabilities.*  
 
-### `ethernaut/`
-Comprehensive solutions to all [Ethernaut](https://ethernaut.openzeppelin.com/) challenges:  
-- Each level solved with **exploitation scripts, automated tests, and detailed writeups**.  
-- Demonstrates practical offensive security techniques and remediation strategies.
+---
 
-### `web3-quiz/`
-A knowledge base of **blockchain security FAQs and quizzes**:  
-- Covers smart contract internals, EVM quirks, Solidity gotchas, and DeFi-specific risks.  
-- Serves as a quick reference for common pitfalls and exam-style questions.
+### 4. `misc/`
+- Collection of smaller experiments, notes, or snippets that don’t fit elsewhere.  
+- Used as a scratchpad for exploratory research.  
 
-### `tutorials/`
-Code-driven tutorials and mini-projects illustrating security concepts in practice.  
-Examples include:  
-- Implementing bonding curves securely  
-- Building upgradeable contracts with safety checks  
-- Testing failure modes with fuzzing/invariants
+---
+
+### 5. [`tutorials/`](./tutorials/)
+- Mini demo projects focused on specific vulnerabilities.  
+- Each tutorial acts as a **self-contained lab** for teaching and testing a single security idea.  
+- Example: [`cross_function_reentrancy/`](./tutorials/cross_function_reentrancy/) demonstrates **Cross-Function Reentrancy** using multiple interdependent contracts.  
+
+👉 *Practical labs for deeper understanding of individual attack surfaces.*  
+
+---
+
+### 6. [`web3-quiz/`](./web3-quiz/)
+- FAQs and exam-style questions in the Web3 security space.  
+- Each Q&A has a **clear, concise answer** with real-world security context.  
+- Built as a lightweight knowledge check and revision tool.  
+
+👉 *Quick recall resource for interviews, certifications, and practice.*  
+
+---
+
+## 🌐 Purpose
+This repository serves as:  
+- A **security knowledge base** — organized and searchable.  
+- A set of **reproducible exploit labs** — each with code, scripts, and tests.  
+- A **long-term reference** — continuously updated as new vulnerabilities and practices evolve.  
 
 ---
 
@@ -41,7 +82,6 @@ Examples include:
 - 🧩 **Composability** — each module builds toward a full-stack understanding of Web3 security
 
 ---
-
 ## 📌 Example Topics Covered
 - Reentrancy, frontrunning & MEV  
 - Integer overflows/underflows  
