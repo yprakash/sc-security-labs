@@ -4,7 +4,7 @@
 [![Python](https://img.shields.io/badge/Python-3.13-yellow.svg)]()
 [![Foundry](https://img.shields.io/badge/Foundry-Forge-green.svg)]()
 
-**Smart Contract Security Labs (`sc-security-labs`)** is a curated collection of hands-on projects, challenges, and educational resources focused on **Ethereum, DeFi, and Web3 security**.  
+**Smart Contract Security Labs** is a curated collection of hands-on projects, challenges, and educational resources focused on **Ethereum, DeFi, and Web3 security**.  
 
 The **goal**: build a structured knowledge base and reproducible exploit labs that reflect both **practical security engineering** and **clear documentation**.  
 
@@ -30,7 +30,6 @@ The **goal**: build a structured knowledge base and reproducible exploit labs th
 👉 *Concise references for key blockchain security topics.*  
 
 ---
-
 ### 3. [`ethernaut/`](./ethernaut/)
 - Full coverage of the [Ethernaut](https://ethernaut.openzeppelin.com/) smart contract CTF by OpenZeppelin.  
 - Each level includes:
@@ -42,13 +41,11 @@ The **goal**: build a structured knowledge base and reproducible exploit labs th
 👉 *Hands-on demonstration of core Solidity/EVM vulnerabilities.*  
 
 ---
-
 ### 4. `misc/`
 - Collection of smaller experiments, notes, or snippets that don’t fit elsewhere.  
 - Used as a scratchpad for exploratory research.  
 
 ---
-
 ### 5. [`tutorials/`](./tutorials/)
 - Mini demo projects focused on specific vulnerabilities.  
 - Each tutorial acts as a **self-contained lab** for teaching and testing a single security idea.  
@@ -57,7 +54,6 @@ The **goal**: build a structured knowledge base and reproducible exploit labs th
 👉 *Practical labs for deeper understanding of individual attack surfaces.*  
 
 ---
-
 ### 6. [`web3-quiz/`](./web3-quiz/)
 - FAQs and exam-style questions in the Web3 security space.  
 - Each Q&A has a **clear, concise answer** with real-world security context.  
@@ -66,7 +62,6 @@ The **goal**: build a structured knowledge base and reproducible exploit labs th
 👉 *Quick recall resource for interviews, certifications, and practice.*  
 
 ---
-
 ## 🌐 Purpose
 This repository serves as:  
 - A **security knowledge base** — organized and searchable.  
@@ -74,7 +69,6 @@ This repository serves as:
 - A **long-term reference** — continuously updated as new vulnerabilities and practices evolve.  
 
 ---
-
 ## 🛡️ Highlights
 - 📖 **Educational + Practical** — combines theory with reproducible exploits and defenses  
 - ⚡ **Automation First** — exploits and solutions come with Python/Foundry test harnesses  
