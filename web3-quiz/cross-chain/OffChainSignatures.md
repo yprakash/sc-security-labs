@@ -16,8 +16,8 @@ But they also introduce **replay attack surfaces** if the signed message is not 
 
 ---
 ## Replay Risks
-- If signatures **don’t include `chainId`**, they can be replayed across Ethereum Mainnet, Polygon, BSC, or forks.
-- If signatures **don’t include `verifyingContract`**, they can be replayed across multiple deployed copies of the same contract.
+- If signatures **don’t include** `chainId`, they can be replayed across Ethereum Mainnet, Polygon, BSC, or forks.
+- If signatures **don’t include** `verifyingContract`, they can be replayed across multiple deployed copies of the same contract.
 - If **nonces** are missing or not enforced, the same signature can be reused indefinitely.
 
 ---
