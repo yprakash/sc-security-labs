@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from dojo_test_utils import get_web3_instance, load_w3_contract
+from sc_test_utils import get_web3_instance, load_w3_contract
 
 FACTOR = 57896044618658097711785492504343953926634992332820282019728792003956564819968
 # FACTOR = 2 ** 255

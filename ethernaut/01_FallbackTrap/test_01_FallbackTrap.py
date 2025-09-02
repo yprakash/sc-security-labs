@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from dojo_test_utils import get_web3_instance, load_w3_contract, minimal_tx
+from sc_test_utils import get_web3_instance, load_w3_contract, minimal_tx
 
 
 @pytest.fixture(scope="module")
