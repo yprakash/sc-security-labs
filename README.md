@@ -13,13 +13,8 @@ The **goal**: build a structured knowledge base and reproducible exploit labs th
 ---
 ## 📂 Repository Structure
 ### 1. `audits/`
-- Contains several subfolders, each simulating an **audit engagement** on a DeFi protocol or smart contract system.  
-- Includes:
-  - Vulnerability findings (documented in markdown).  
-  - Proof-of-concept exploits (Solidity/Python).  
-  - Tests verifying exploitability and fixes.  
 
-👉 *Realistic audit-style case studies with reproducible examples.*  
+👉 **Coming Soon: Real-world style audit reports and walkthroughs**  
 
 ---
 ### 2. [`concepts/`](./concepts/)
@@ -41,7 +36,7 @@ The **goal**: build a structured knowledge base and reproducible exploit labs th
 👉 *Hands-on demonstration of core Solidity/EVM vulnerabilities.*  
 
 ---
-### 4. `misc/`
+### 4. [`misc/`](./misc/)
 - Collection of smaller experiments, notes, or snippets that don’t fit elsewhere.  
 - Used as a scratchpad for exploratory research.  
 
