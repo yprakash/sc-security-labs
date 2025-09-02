@@ -1,4 +1,4 @@
-# Challenge 03 - Coin Flip
+# Ethernaut Level 03 - Coin Flip
 ### Overview
 This level demonstrates the danger of using predictable on-chain values for randomness. The contract relies on `blockhash` and block properties, which are deterministic and exploitable.
 

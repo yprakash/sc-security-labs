@@ -1,4 +1,4 @@
-# Challenge 01 - FallbackTrap
+# Ethernaut Level 01 - FallbackTrap
 #### Difficulty: 🟢 Easy
 The goal of this level is to become the owner of the contract and drain its balance.
 

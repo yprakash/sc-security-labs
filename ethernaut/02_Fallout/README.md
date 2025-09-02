@@ -1,4 +1,4 @@
-# Challenge 02 - Fallout
+# Ethernaut Level 02 - Fallout
 
 This level demonstrates how a small typo in a constructor’s name can break the entire access control of a contract — letting any attacker become the owner. The inspiration comes from the real-world case of Rubixi, a Ponzi-like contract that accidentally allowed any user to hijack ownership due to a misnamed constructor.
 

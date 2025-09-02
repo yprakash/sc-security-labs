@@ -1,4 +1,4 @@
-# Challenge 04 - Telephone
+# Ethernaut Level 04 - Telephone
 ### Overview
 This level highlights the danger of using `tx.origin` for authorization. Contracts that rely on it can be tricked when calls are made through another contract.
 

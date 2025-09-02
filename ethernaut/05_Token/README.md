@@ -1,4 +1,4 @@
-# Challenge 05 — Token
+# Ethernaut Level 05 — Token
 ### Overview
 This challenge demonstrates how improper use of arithmetic in Solidity can lead to **integer underflow**, allowing attackers to mint more tokens than intended.
 
