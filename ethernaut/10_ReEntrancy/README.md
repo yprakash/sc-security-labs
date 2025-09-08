@@ -1,4 +1,4 @@
-# Ethernaut Level Level 10 — Re-entrancy: The Recursive Trap 🔁
+# Ethernaut Level 10 — Re-entrancy: The Recursive Trap 🔁
 
 The contract in this level manages Ether balances and allows users to deposit and withdraw their funds. However, it contains a critical flaw in the `withdraw()` function that makes it vulnerable to a **re-entrancy attack**.
 
