@@ -1,4 +1,4 @@
-# 🧩 Level 15: Naught Coin
+# 🧩 Ethernaut Level 15: Naught Coin
 ### 🔒 Goal
 Drain all your tokens from the contract despite a time lock that prevents transfers.
 
