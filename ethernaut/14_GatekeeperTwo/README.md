@@ -23,14 +23,14 @@ assembly {
 }
 require(x == 0);
 ```
-- `extcodesize(caller())` is 0 during constructor execution of a contract.
+- `extcodesize(caller())` is `0` during constructor execution of a contract.
 - ✅ Solution: Call `enter()` from the constructor of your attacking contract.
 
 🔐 Gate Three
 ```solidity
 require(uint64(bytes8(keccak256(abi.encodePacked(msg.sender)))) ^ uint64(_gateKey) == type(uint64).max);
 ```
-- Use XOR to derive the _`gateKey`
+- Use XOR to derive the `_gateKey`
 
 ---
 ### 🚀 Exploit Strategy
