@@ -21,7 +21,7 @@ For devs/auditors, these are critical to review because misuse often leads to ex
 - `block.coinbase` → Miner’s(PoW) / Validator’s(PoS) address, receiving the block rewards.  
   ⚠️ Miners can influence rewards if used in logic.  
 - `block.gaslimit` → Block gas limit.  
-- `block.basefee` → Base fee of current block ([EIP-1559](https://eips.ethereum.org/EIPS/eip-1559)).
+- `block.basefee` → Base fee of current block ([EIP-1559](https://eips.ethereum.org/EIPS/eip-1559)).  
   ⚠️ minimum fee required (burned, not a tip)
 
 ---
