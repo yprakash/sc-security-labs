@@ -84,6 +84,5 @@ Once it is deployed at the precomputed address, the approval is already valid.
 ## References
 - [EIP-1014: CREATE2](https://eips.ethereum.org/EIPS/eip-1014)  
 - [EVM Opcodes – CREATE2](https://www.evm.codes/#f5)  
-- [Vitalik on Counterfactual Contracts](https://ethereum-magicians.org/t/eip-1014-create2/3058)  
 - [Uniswap V3 Factory](https://etherscan.io/address/0x1f98431c8ad98523631ae4a59f267346ea31f984#code)  
 - [ERC-4337 Account Abstraction](https://eips.ethereum.org/EIPS/eip-4337)  
